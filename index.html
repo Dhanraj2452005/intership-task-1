@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODTECH Interactive Quiz</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2.5rem; /* Increased padding */
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* Space between sections */
+        }
+        .question-text {
+            font-size: 1.75rem; /* Larger question text */
+            font-weight: 700;
+            color: #1a202c; /* Darker text for contrast */
+            margin-bottom: 1.5rem;
+        }
+        .answer-button {
+            background-color: #e2e8f0; /* Light gray for buttons */
+            color: #2d3748; /* Darker text for buttons */
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem; /* Rounded button corners */
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent; /* Border for selected state */
+        }
+        .answer-button:hover {
+            background-color: #cbd5e0; /* Slightly darker on hover */
+        }
+        .answer-button.selected {
+            background-color: #3182ce; /* Blue for selected */
+            color: #ffffff;
+            border-color: #2b6cb0; /* Darker blue border */
+        }
+        .answer-button.correct {
+            background-color: #48bb78; /* Green for correct */
+            color: #ffffff;
+            border-color: #38a169;
+        }
+        .answer-button.incorrect {
+            background-color: #ef4444; /* Red for incorrect */
+            color: #ffffff;
+            border-color: #dc2626;
+        }
+        .submit-button {
+            background-color: #4299e1; /* Primary blue for submit */
+            color: #ffffff;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .submit-button:hover {
+            background-color: #3182ce; /* Darker blue on hover */
+        }
+        .feedback-message {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+        .feedback-message.correct {
+            color: #38a169; /* Green for correct feedback */
+        }
+        .feedback-message.incorrect {
+            color: #e53e3e; /* Red for incorrect feedback */
+        }
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-top: 1rem;
+        }
+        .restart-button {
+            background-color: #6366f1; /* Purple for restart */
+            color: #ffffff;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .restart-button:hover {
+            background-color: #4f46e5; /* Darker purple on hover */
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-6">CODTECH Quiz</h1>
+
+        <div id="quiz-section">
+            <p id="question-text" class="question-text"></p>
+            <div id="answer-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Answer buttons will be dynamically inserted here -->
+            </div>
+            <button id="submit-button" class="submit-button">Submit Answer</button>
+            <p id="feedback-message" class="feedback-message hidden"></p>
+        </div>
+
+        <div id="result-section" class="hidden">
+            <p class="text-3xl font-bold text-gray-800 mb-4">Quiz Completed!</p>
+            <p id="final-score" class="score-display"></p>
+            <button id="restart-button" class="restart-button">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Array of quiz questions
+        const questions = [
+            {
+                question: "What does HTML stand for?",
+                options: [
+                    "Hyper Text Markup Language",
+                    "Hyperlinks and Text Markup Language",
+                    "Home Tool Markup Language",
+                    "Hyper Text Multi Language"
+                ],
+                answer: "Hyper Text Markup Language"
+            },
+            {
+                question: "Which CSS property is used to change the background color?",
+                options: [
+                    "color",
+                    "background-color",
+                    "bgcolor",
+                    "background"
+                ],
+                answer: "background-color"
+            },
+            {
+                question: "Which JavaScript keyword is used to declare a variable?",
+                options: [
+                    "var",
+                    "let",
+                    "const",
+                    "All of the above"
+                ],
+                answer: "All of the above"
+            },
+            {
+                question: "What is the correct way to refer to an external script called 'script.js'?",
+                options: [
+                    "<script href='script.js'>",
+                    "<script name='script.js'>",
+                    "<script src='script.js'>",
+                    "<script file='script.js'>"
+                ],
+                answer: "<script src='script.js'>"
+            },
+            {
+                question: "Which of the following is NOT a JavaScript data type?",
+                options: [
+                    "Boolean",
+                    "String",
+                    "Float",
+                    "Number"
+                ],
+                answer: "Float"
+            }
+        ];
+
+        // DOM elements
+        const questionText = document.getElementById('question-text');
+        const answerButtonsContainer = document.getElementById('answer-buttons');
+        const submitButton = document.getElementById('submit-button');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let quizActive = true; // To prevent multiple submissions for the same question
+
+        // Function to load a question
+        function loadQuestion() {
+            quizActive = true; // Reset quiz active state for new question
+            selectedAnswer = null; // Clear previously selected answer
+            feedbackMessage.classList.add('hidden'); // Hide feedback message
+
+            // Clear previous answer buttons
+            answerButtonsContainer.innerHTML = '';
+
+            const currentQuestion = questions[currentQuestionIndex];
+            questionText.textContent = currentQuestion.question;
+
+            // Create answer buttons
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('answer-button');
+                button.addEventListener('click', () => selectAnswer(button, option));
+                answerButtonsContainer.appendChild(button);
+            });
+
+            submitButton.textContent = 'Submit Answer';
+            submitButton.classList.remove('hidden');
+        }
+
+        // Function to handle answer selection
+        function selectAnswer(button, option) {
+            // Remove 'selected' class from all buttons
+            document.querySelectorAll('.answer-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            // Add 'selected' class to the clicked button
+            button.classList.add('selected');
+            selectedAnswer = option;
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            if (!quizActive) return; // Prevent double submission
+
+            if (selectedAnswer === null) {
+                feedbackMessage.textContent = "Please select an answer!";
+                feedbackMessage.classList.remove('hidden');
+                feedbackMessage.classList.remove('correct', 'incorrect');
+                feedbackMessage.style.color = '#f59e0b'; // Amber color for warning
+                return;
+            }
+
+            quizActive = false; // Disable further submissions for this question
+
+            const currentQuestion = questions[currentQuestionIndex];
+            const isCorrect = (selectedAnswer === currentQuestion.answer);
+
+            // Provide visual feedback on buttons
+            document.querySelectorAll('.answer-button').forEach(btn => {
+                if (btn.textContent === currentQuestion.answer) {
+                    btn.classList.add('correct'); // Mark correct answer
+                } else if (btn.textContent === selectedAnswer && !isCorrect) {
+                    btn.classList.add('incorrect'); // Mark incorrect selected answer
+                }
+                btn.disabled = true; // Disable all buttons after submission
+            });
+
+            // Provide textual feedback
+            feedbackMessage.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackMessage.textContent = "Correct!";
+                feedbackMessage.classList.remove('incorrect');
+                feedbackMessage.classList.add('correct');
+                score++;
+            } else {
+                feedbackMessage.textContent = `Incorrect. The correct answer was: ${currentQuestion.answer}`;
+                feedbackMessage.classList.remove('correct');
+                feedbackMessage.classList.add('incorrect');
+            }
+
+            // Prepare for next question or show results
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500); // Wait 1.5 seconds before moving to the next question/results
+        }
+
+        // Function to show final results
+        function showResults() {
+            quizSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+            finalScoreDisplay.textContent = `You scored ${score} out of ${questions.length} questions!`;
+        }
+
+        // Function to restart the quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedAnswer = null;
+            quizActive = true;
+            resultSection.classList.add('hidden');
+            quizSection.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Event Listeners
+        submitButton.addEventListener('click', checkAnswer);
+        restartButton.addEventListener('click', restartQuiz);
+
+        // Initial load
+        window.onload = loadQuestion;
+
+    </script>
+</body>
+</html>
